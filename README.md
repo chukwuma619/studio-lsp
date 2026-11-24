@@ -2,7 +2,7 @@
 
 Studio LSP is the Fiber liquidity service for [Fiber Studio](https://www.getfiberstudio.com/). A Fiber Studio wallet registers with Studio LSP. When someone pays that wallet and it has no inbound channel, Studio LSP opens a private CKB channel and forwards the payment. Fiber Studio stays the wallet. Official `fnn` stays the node. Studio LSP is the service you run.
 
-The channel protocol is Fiber's just-in-time open. Studio LSP turns it on and sets the fee and funding limits.
+A send spends CKB the wallet already holds. Studio LSP accepts that channel and locks `accept_funding_shannons` on its own side, which is what the wallet can later receive on the same channel. A receive with no channel uses a just-in-time open: Studio LSP funds it, up to `max_funding_shannons`, and the sender pays `open_fee_shannons`.
 
 ## Policy
 
@@ -10,8 +10,8 @@ Amounts are shannons. 1 CKB is 100,000,000 shannons.
 
 | File | Network |
 | --- | --- |
-| `policy/testnet.toml` | testnet, 10 CKB open fee, 100 CKB minimum payment, 10,000 CKB maximum funding |
-| `policy/mainnet.toml` | mainnet, same fee and minimum, 1,000 CKB maximum funding |
+| `policy/testnet.toml` | testnet, 10 CKB open fee, 100 CKB minimum payment, 10,000 CKB maximum funding, 1,000 CKB on a wallet-funded channel |
+| `policy/mainnet.toml` | mainnet, same fee and minimum, 1,000 CKB maximum funding, 1,000 CKB on a wallet-funded channel |
 
 Edit a policy before you fund the node. `max_funding_shannons` is CKB Studio LSP locks on chain. `open_fee_shannons` is what the sender pays when a new channel has to be opened. An explicit fee of 0 charges nothing. Leaving the fee unset makes `fnn` refuse the open.
 
@@ -32,6 +32,7 @@ That writes:
 - `announced_node_name: "Studio LSP"`
 - `jit_service_enabled: true`
 - `jit_open_fee`, `jit_min_amount`, `jit_max_funding`, `jit_max_inflight_opens`
+- `auto_accept_channel_ckb_funding_amount` and `open_channel_auto_accept_min_ckb_funding_amount`
 
 Then fund the node's CKB wallet and start official `fnn` with that config. The node needs a public listen address in `announced_addrs`. Payments can only open a channel while Studio LSP is online and holds enough CKB under `max_funding_shannons`.
 

@@ -1,13 +1,18 @@
-use crate::policy::Policy;
+use crate::policy::{Policy, SHANNONS_PER_CKB};
 
-const SERVICE_KEYS: [&str; 6] = [
+const SERVICE_KEYS: [&str; 8] = [
     "announced_node_name",
     "jit_service_enabled",
     "jit_open_fee",
     "jit_min_amount",
     "jit_max_funding",
     "jit_max_inflight_opens",
+    "auto_accept_channel_ckb_funding_amount",
+    "open_channel_auto_accept_min_ckb_funding_amount",
 ];
+
+/// Smallest wallet funding this service will accept. Matches Fiber's default of 100 CKB.
+const MIN_WALLET_FUNDING_SHANNONS: u64 = 100 * SHANNONS_PER_CKB;
 
 /// Wallet-side keys. A Studio LSP node serves channels; it does not register as a receiver.
 const RECEIVER_KEYS: [&str; 3] = ["jit_lsp_pubkey", "jit_max_amount", "jit_max_open_fee"];
@@ -84,6 +89,11 @@ fn service_lines(policy: &Policy) -> Vec<String> {
         format!("  jit_min_amount: {}", policy.min_amount_shannons),
         format!("  jit_max_funding: {}", policy.max_funding_shannons),
         format!("  jit_max_inflight_opens: {}", policy.max_inflight_opens),
+        format!(
+            "  auto_accept_channel_ckb_funding_amount: {}",
+            policy.accept_funding_shannons
+        ),
+        format!("  open_channel_auto_accept_min_ckb_funding_amount: {MIN_WALLET_FUNDING_SHANNONS}"),
     ]
 }
 
@@ -166,6 +176,8 @@ rpc:
         assert!(rendered.contains("jit_service_enabled: true"));
         assert!(rendered.contains("jit_open_fee: 1000000000"));
         assert!(rendered.contains("jit_max_funding: 1000000000000"));
+        assert!(rendered.contains("auto_accept_channel_ckb_funding_amount: 100000000000"));
+        assert!(rendered.contains("open_channel_auto_accept_min_ckb_funding_amount: 10000000000"));
         assert!(rendered.contains("# jit_service_enabled: false"));
         assert!(!rendered.contains("jit_lsp_pubkey"));
         assert!(!rendered.contains("jit_max_amount"));

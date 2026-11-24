@@ -6,4 +6,5 @@ announced_node_name = "Studio LSP"
 open_fee_shannons = 1_000_000_000
 min_amount_shannons = 10_000_000_000
 max_funding_shannons = 100_000_000_000
+accept_funding_shannons = 100_000_000_000
 max_inflight_opens = 4

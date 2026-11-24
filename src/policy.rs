@@ -14,6 +14,7 @@ pub struct Policy {
     #[serde(default)]
     pub min_amount_shannons: u64,
     pub max_funding_shannons: u64,
+    pub accept_funding_shannons: u64,
     #[serde(default = "default_inflight_opens")]
     pub max_inflight_opens: usize,
 }
@@ -40,6 +41,8 @@ pub enum PolicyError {
     Minimum,
     #[error("max in-flight opens must be at least 1")]
     Inflight,
+    #[error("accept funding must leave spendable inbound above the cell reserve, and fit under max funding")]
+    AcceptFunding,
 }
 
 impl Policy {
@@ -70,6 +73,11 @@ impl Policy {
         if self.min_amount_shannons > self.receiver_max_amount_shannons() {
             return Err(PolicyError::Minimum);
         }
+        if self.accept_funding_shannons <= CELL_RESERVE_SHANNONS
+            || self.accept_funding_shannons > self.max_funding_shannons
+        {
+            return Err(PolicyError::AcceptFunding);
+        }
         Ok(())
     }
 
@@ -96,6 +104,7 @@ mod tests {
             assert!(policy.open_fee_shannons > 0);
             assert!(policy.receiver_max_amount_shannons() >= policy.min_amount_shannons);
             assert!(policy.max_funding_shannons > policy.receiver_max_amount_shannons());
+            assert!(policy.accept_funding_shannons > CELL_RESERVE_SHANNONS);
         }
     }
 
@@ -106,6 +115,7 @@ mod tests {
             chain = "testnet"
             open_fee_shannons = 0
             max_funding_shannons = 1
+            accept_funding_shannons = 1
             "#,
         )
         .unwrap_err();

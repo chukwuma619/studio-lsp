@@ -102,11 +102,12 @@ fn apply_policy(policy_path: &PathBuf, config_path: &PathBuf) -> Result<(), Stri
 
 fn summary(policy: &Policy) -> String {
     format!(
-        "Studio LSP on {}\nopen fee: {} shannons\nminimum payment: {} shannons\nmaximum funding: {} shannons\nwallet payment cap: {} shannons\nchannels opening at once: {}",
+        "Studio LSP on {}\nopen fee: {} shannons\nminimum payment: {} shannons\nmaximum funding: {} shannons\naccept funding: {} shannons\nwallet payment cap: {} shannons\nchannels opening at once: {}",
         policy.chain,
         policy.open_fee_shannons,
         policy.min_amount_shannons,
         policy.max_funding_shannons,
+        policy.accept_funding_shannons,
         policy.receiver_max_amount_shannons(),
         policy.max_inflight_opens
     )
