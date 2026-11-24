@@ -1,0 +1,16 @@
+# Studio LSP testnet policy. Amounts are shannons (1 CKB = 100_000_000).
+chain = "testnet"
+announced_node_name = "Studio LSP"
+
+# Fee a Fiber Studio wallet pays when Studio LSP opens a channel for an incoming payment.
+# Explicit 0 charges nothing. fnn refuses funded opens when this is missing.
+open_fee_shannons = 1_000_000_000
+
+# Smallest payment that may open a channel.
+min_amount_shannons = 10_000_000_000
+
+# Largest amount of CKB Studio LSP will lock into one channel, including the cell reserve.
+# 0 funds nothing.
+max_funding_shannons = 1_000_000_000_000
+
+max_inflight_opens = 8

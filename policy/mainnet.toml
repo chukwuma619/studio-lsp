@@ -1,0 +1,9 @@
+# Studio LSP mainnet policy. Edit the amounts before funding the node.
+# Amounts are shannons (1 CKB = 100_000_000). This file spends real CKB.
+chain = "mainnet"
+announced_node_name = "Studio LSP"
+
+open_fee_shannons = 1_000_000_000
+min_amount_shannons = 10_000_000_000
+max_funding_shannons = 100_000_000_000
+max_inflight_opens = 4
