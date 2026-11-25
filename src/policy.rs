@@ -87,6 +87,12 @@ impl Policy {
         self.max_funding_shannons
             .saturating_sub(CELL_RESERVE_SHANNONS)
     }
+
+    /// Spendable CKB left on this node's side after a just-in-time payment settles.
+    pub fn inbound_cushion_shannons(&self) -> u64 {
+        self.accept_funding_shannons
+            .saturating_sub(CELL_RESERVE_SHANNONS)
+    }
 }
 
 #[cfg(test)]
@@ -105,6 +111,10 @@ mod tests {
             assert!(policy.receiver_max_amount_shannons() >= policy.min_amount_shannons);
             assert!(policy.max_funding_shannons > policy.receiver_max_amount_shannons());
             assert!(policy.accept_funding_shannons > CELL_RESERVE_SHANNONS);
+            assert_eq!(
+                policy.inbound_cushion_shannons() + CELL_RESERVE_SHANNONS,
+                policy.accept_funding_shannons
+            );
         }
     }
 

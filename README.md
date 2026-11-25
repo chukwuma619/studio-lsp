@@ -34,9 +34,11 @@ That writes:
 - `jit_open_fee`, `jit_min_amount`, `jit_max_funding`, `jit_max_inflight_opens`
 - `auto_accept_channel_ckb_funding_amount` and `open_channel_auto_accept_min_ckb_funding_amount`
 
-Then fund the node's CKB wallet and start official `fnn` with that config. The node needs a public listen address in `announced_addrs`. Payments can only open a channel while Studio LSP is online and holds enough CKB under `max_funding_shannons`.
+Then fund the node's CKB wallet and start `fnn` with that config. The node needs a public listen address in `announced_addrs`. Payments can only open a channel while Studio LSP is online and holds enough CKB under `max_funding_shannons`.
 
-Read the pubkey and listen multiaddr from `fnn` after the first start.
+`jit_inbound_cushion` is written for you. It is the spendable part of `accept_funding_shannons`. On a just-in-time receive, Studio LSP locks the payment, the cell reserve, and this cushion, capped by `max_funding_shannons`. After the payment settles, the cushion is still inbound, so the wallet can receive again on that channel.
+
+Read the pubkey and listen multiaddr from `fnn` after the first start. The full server setup, funding, and release steps are in [DEPLOY.md](DEPLOY.md).
 
 ## Point Fiber Studio at Studio LSP
 
@@ -47,9 +49,19 @@ cargo run -- snippet \
   --multiaddr /dns4/your-host/tcp/8228/p2p/Qm...
 ```
 
-Put the printed object on `testnet` or `mainnet` in Fiber Studio's `app/shared/liquidity.json`. The payment cap is the funding maximum minus the 99 CKB cell reserve. The open-fee cap equals the Studio LSP fee, which is the highest fee Fiber Studio will accept from this node.
+Or write that entry straight into the wallet manifest. This replaces only the network named in the policy and leaves the other network as it is.
 
-Rebuild Fiber Studio after that change. The next time a Fiber Studio node starts, it registers with Studio LSP.
+```bash
+cargo run -- publish \
+  --policy policy/testnet.toml \
+  --pubkey 02... \
+  --multiaddr /dns4/your-host/tcp/8228/p2p/Qm... \
+  --liquidity-json ../fiber-studio/app/shared/liquidity.json
+```
+
+The payment cap is the funding maximum minus the 99 CKB cell reserve. The open-fee cap equals the Studio LSP fee, which is the highest fee Fiber Studio will accept from this node.
+
+Rebuild and ship Fiber Studio after that change. The next time a Fiber Studio node starts, it connects to Studio LSP only, registers for incoming payments, and opens a private channel with the user's CKB when they send.
 
 ## Develop
 

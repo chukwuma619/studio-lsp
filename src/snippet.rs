@@ -1,4 +1,5 @@
 use serde::Serialize;
+use serde_json::Value;
 
 use crate::policy::Policy;
 
@@ -6,6 +7,7 @@ use crate::policy::Policy;
 pub enum SnippetError {
     InvalidPubkey,
     InvalidMultiaddr,
+    InvalidManifest(String),
 }
 
 #[derive(Debug, Serialize)]
@@ -39,6 +41,32 @@ pub fn studio_entry(
         max_open_fee_shannons: policy.open_fee_shannons.to_string(),
     };
     Ok(serde_json::to_string_pretty(&entry).expect("studio entry serializes"))
+}
+
+/// Replace the policy's network entry inside Fiber Studio `liquidity.json`.
+pub fn merge_liquidity_manifest(
+    policy: &Policy,
+    pubkey: &str,
+    multiaddr: &str,
+    manifest: &str,
+) -> Result<String, SnippetError> {
+    let entry: Value = serde_json::from_str(&studio_entry(policy, pubkey, multiaddr)?)
+        .expect("studio entry is json");
+    let mut document: Value = serde_json::from_str(manifest)
+        .map_err(|error| SnippetError::InvalidManifest(error.to_string()))?;
+    let object = document
+        .as_object_mut()
+        .ok_or_else(|| SnippetError::InvalidManifest("liquidity.json must be an object".into()))?;
+    if !object.contains_key(&policy.chain) {
+        return Err(SnippetError::InvalidManifest(format!(
+            "liquidity.json has no {} entry",
+            policy.chain
+        )));
+    }
+    object.insert(policy.chain.clone(), entry);
+    let mut rendered = serde_json::to_string_pretty(&document).expect("manifest serializes");
+    rendered.push('\n');
+    Ok(rendered)
 }
 
 fn normalize_pubkey(raw: &str) -> Option<String> {
@@ -98,6 +126,30 @@ mod tests {
             max_amount + CELL_RESERVE_SHANNONS,
             policy.max_funding_shannons
         );
+    }
+
+    #[test]
+    fn publish_replaces_one_network_and_keeps_the_other() {
+        let policy = Policy::from_toml(include_str!("../policy/testnet.toml")).unwrap();
+        let pubkey = format!("02{}", "ab".repeat(32));
+        let manifest = r#"{
+  "testnet": { "mode": "hub", "relayId": "node1" },
+  "mainnet": { "mode": "hub", "relayId": "node1" }
+}
+"#;
+        let raw = merge_liquidity_manifest(
+            &policy,
+            &pubkey,
+            "/dns4/studio-lsp.example/tcp/8228/p2p/QmExample",
+            manifest,
+        )
+        .unwrap();
+        let document: serde_json::Value = serde_json::from_str(&raw).unwrap();
+        assert_eq!(document["testnet"]["mode"], "lsp");
+        assert_eq!(document["testnet"]["pubkey"], pubkey);
+        assert_eq!(document["mainnet"]["mode"], "hub");
+        assert_eq!(document["mainnet"]["relayId"], "node1");
+        assert!(raw.ends_with('\n'));
     }
 
     #[test]

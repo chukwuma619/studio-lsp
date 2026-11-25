@@ -40,6 +40,17 @@ enum Command {
         #[arg(long)]
         multiaddr: String,
     },
+    /// Write this node into Fiber Studio's liquidity.json for the policy network.
+    Publish {
+        #[arg(long)]
+        policy: PathBuf,
+        #[arg(long)]
+        pubkey: String,
+        #[arg(long)]
+        multiaddr: String,
+        #[arg(long)]
+        liquidity_json: PathBuf,
+    },
 }
 
 fn main() -> ExitCode {
@@ -74,7 +85,42 @@ fn main() -> ExitCode {
             }
             Err(message) => fail(message),
         },
+        Command::Publish {
+            policy,
+            pubkey,
+            multiaddr,
+            liquidity_json,
+        } => match publish(&policy, &pubkey, &multiaddr, &liquidity_json) {
+            Ok(()) => {
+                println!("Wrote the Studio LSP entry to {}", liquidity_json.display());
+                ExitCode::SUCCESS
+            }
+            Err(message) => fail(message),
+        },
     }
+}
+
+fn publish(
+    policy_path: &PathBuf,
+    pubkey: &str,
+    multiaddr: &str,
+    liquidity_json: &PathBuf,
+) -> Result<(), String> {
+    let policy = load_policy(policy_path)?;
+    let current = fs::read_to_string(liquidity_json)
+        .map_err(|error| format!("failed to read {}: {error}", liquidity_json.display()))?;
+    let rendered = snippet::merge_liquidity_manifest(&policy, pubkey, multiaddr, &current)
+        .map_err(snippet_message)?;
+    let file_name = liquidity_json
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or("liquidity.json");
+    let temporary = liquidity_json.with_file_name(format!(".{file_name}.tmp"));
+    fs::write(&temporary, rendered)
+        .map_err(|error| format!("failed to write {}: {error}", temporary.display()))?;
+    fs::rename(&temporary, liquidity_json)
+        .map_err(|error| format!("failed to replace {}: {error}", liquidity_json.display()))?;
+    Ok(())
 }
 
 fn load_policy(path: &PathBuf) -> Result<Policy, String> {
@@ -102,12 +148,13 @@ fn apply_policy(policy_path: &PathBuf, config_path: &PathBuf) -> Result<(), Stri
 
 fn summary(policy: &Policy) -> String {
     format!(
-        "Studio LSP on {}\nopen fee: {} shannons\nminimum payment: {} shannons\nmaximum funding: {} shannons\naccept funding: {} shannons\nwallet payment cap: {} shannons\nchannels opening at once: {}",
+        "Studio LSP on {}\nopen fee: {} shannons\nminimum payment: {} shannons\nmaximum funding: {} shannons\naccept funding: {} shannons\ninbound cushion: {} shannons\nwallet payment cap: {} shannons\nchannels opening at once: {}",
         policy.chain,
         policy.open_fee_shannons,
         policy.min_amount_shannons,
         policy.max_funding_shannons,
         policy.accept_funding_shannons,
+        policy.inbound_cushion_shannons(),
         policy.receiver_max_amount_shannons(),
         policy.max_inflight_opens
     )
@@ -128,6 +175,7 @@ fn snippet_message(error: SnippetError) -> String {
         SnippetError::InvalidMultiaddr => {
             "multiaddr must start with / and contain no spaces".to_string()
         }
+        SnippetError::InvalidManifest(message) => message,
     }
 }
 

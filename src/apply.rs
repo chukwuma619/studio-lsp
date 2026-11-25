@@ -1,11 +1,12 @@
 use crate::policy::{Policy, SHANNONS_PER_CKB};
 
-const SERVICE_KEYS: [&str; 8] = [
+const SERVICE_KEYS: [&str; 9] = [
     "announced_node_name",
     "jit_service_enabled",
     "jit_open_fee",
     "jit_min_amount",
     "jit_max_funding",
+    "jit_inbound_cushion",
     "jit_max_inflight_opens",
     "auto_accept_channel_ckb_funding_amount",
     "open_channel_auto_accept_min_ckb_funding_amount",
@@ -88,6 +89,10 @@ fn service_lines(policy: &Policy) -> Vec<String> {
         format!("  jit_open_fee: {}", policy.open_fee_shannons),
         format!("  jit_min_amount: {}", policy.min_amount_shannons),
         format!("  jit_max_funding: {}", policy.max_funding_shannons),
+        format!(
+            "  jit_inbound_cushion: {}",
+            policy.inbound_cushion_shannons()
+        ),
         format!("  jit_max_inflight_opens: {}", policy.max_inflight_opens),
         format!(
             "  auto_accept_channel_ckb_funding_amount: {}",
@@ -176,6 +181,7 @@ rpc:
         assert!(rendered.contains("jit_service_enabled: true"));
         assert!(rendered.contains("jit_open_fee: 1000000000"));
         assert!(rendered.contains("jit_max_funding: 1000000000000"));
+        assert!(rendered.contains("jit_inbound_cushion: 90100000000"));
         assert!(rendered.contains("auto_accept_channel_ckb_funding_amount: 100000000000"));
         assert!(rendered.contains("open_channel_auto_accept_min_ckb_funding_amount: 10000000000"));
         assert!(rendered.contains("# jit_service_enabled: false"));
