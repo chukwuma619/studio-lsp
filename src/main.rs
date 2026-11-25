@@ -163,18 +163,20 @@ fn summary(policy: &Policy) -> String {
 fn apply_message(error: ApplyError) -> String {
     match error {
         ApplyError::MissingFiberSection => "config is missing a fiber: section".to_string(),
+        ApplyError::MissingChain => "config fiber section is missing chain".to_string(),
         ApplyError::ChainMismatch { found, expected } => {
             format!("config chain is {found}, policy chain is {expected}")
         }
+        ApplyError::UnsupportedConfig(message) | ApplyError::InvalidPolicy(message) => message,
     }
 }
 
 fn snippet_message(error: SnippetError) -> String {
     match error {
-        SnippetError::InvalidPubkey => "pubkey must be 66 hex characters".to_string(),
-        SnippetError::InvalidMultiaddr => {
-            "multiaddr must start with / and contain no spaces".to_string()
+        SnippetError::InvalidPubkey => {
+            "pubkey must be a compressed secp256k1 public key (66 hex characters)".to_string()
         }
+        SnippetError::InvalidMultiaddr(message) => message,
         SnippetError::InvalidManifest(message) => message,
     }
 }

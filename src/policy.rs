@@ -7,12 +7,12 @@ pub const SHANNONS_PER_CKB: u64 = 100_000_000;
 pub const CELL_RESERVE_SHANNONS: u64 = 100 * SHANNONS_PER_CKB;
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Policy {
     pub chain: String,
     #[serde(default = "default_node_name")]
     pub announced_node_name: String,
     pub open_fee_shannons: u64,
-    #[serde(default)]
     pub min_amount_shannons: u64,
     pub max_funding_shannons: u64,
     pub accept_funding_shannons: u64,
@@ -24,6 +24,17 @@ fn default_node_name() -> String {
     "Studio LSP".to_string()
 }
 
+/// Characters that would break the double-quoted YAML scalar `apply` writes.
+fn invalid_node_name_char(character: char) -> bool {
+    character.is_control()
+        || character == '"'
+        || character == '#'
+        || character == '\\'
+        || character == '\u{0085}'
+        || character == '\u{2028}'
+        || character == '\u{2029}'
+}
+
 fn default_inflight_opens() -> usize {
     8
 }
@@ -32,7 +43,7 @@ fn default_inflight_opens() -> usize {
 pub enum PolicyError {
     #[error("chain must be testnet or mainnet")]
     Chain,
-    #[error("announced node name must be a single line without quotes")]
+    #[error("announced node name must be a single line without quotes, hashes, or backslashes")]
     NodeName,
     #[error(
         "max funding must cover the {CELL_RESERVE_SHANNONS} shannon cell reserve plus a payment"
@@ -58,11 +69,7 @@ impl Policy {
             return Err(PolicyError::Chain);
         }
         let name = self.announced_node_name.trim();
-        if name.is_empty()
-            || name.chars().any(|character| {
-                character.is_control() || character == '"' || character == '#' || character == '\n'
-            })
-        {
+        if name.is_empty() || name.chars().any(invalid_node_name_char) {
             return Err(PolicyError::NodeName);
         }
         if self.max_inflight_opens == 0 {
@@ -125,11 +132,79 @@ mod tests {
             r#"
             chain = "testnet"
             open_fee_shannons = 0
+            min_amount_shannons = 0
             max_funding_shannons = 1
             accept_funding_shannons = 1
             "#,
         )
         .unwrap_err();
         assert!(error.contains("cell reserve"));
+    }
+
+    #[test]
+    fn rejects_an_unknown_field_instead_of_using_a_default() {
+        let error = Policy::from_toml(
+            r#"
+            chain = "testnet"
+            open_fee_shannons = 1
+            min_amount_shannon = 1
+            min_amount_shannons = 1
+            max_funding_shannons = 20000000000
+            accept_funding_shannons = 20000000000
+            "#,
+        )
+        .unwrap_err();
+        assert!(error.contains("min_amount_shannon"));
+    }
+
+    #[test]
+    fn rejects_a_missing_minimum_payment() {
+        let error = Policy::from_toml(
+            r#"
+            chain = "testnet"
+            open_fee_shannons = 1
+            max_funding_shannons = 20000000000
+            accept_funding_shannons = 20000000000
+            "#,
+        )
+        .unwrap_err();
+        assert!(error.contains("min_amount_shannons"));
+    }
+
+    #[test]
+    fn rejects_a_name_that_can_break_out_of_a_yaml_string() {
+        for name in ["lsp\\", "lsp\"", "lsp#", "a\u{2028}b", "a\nb"] {
+            let error = Policy {
+                announced_node_name: name.to_string(),
+                ..shipped_amounts()
+            }
+            .validate()
+            .unwrap_err();
+            assert_eq!(error, PolicyError::NodeName, "{name:?}");
+        }
+        let error = Policy::from_toml(
+            r#"
+            chain = "testnet"
+            announced_node_name = "lsp\\"
+            open_fee_shannons = 1
+            min_amount_shannons = 1
+            max_funding_shannons = 20000000000
+            accept_funding_shannons = 20000000000
+            "#,
+        )
+        .unwrap_err();
+        assert!(error.contains("node name"), "{error}");
+    }
+
+    fn shipped_amounts() -> Policy {
+        Policy {
+            chain: "testnet".to_string(),
+            announced_node_name: "Studio LSP".to_string(),
+            open_fee_shannons: 1,
+            min_amount_shannons: 1,
+            max_funding_shannons: 20_000_000_000,
+            accept_funding_shannons: 20_000_000_000,
+            max_inflight_opens: 8,
+        }
     }
 }
