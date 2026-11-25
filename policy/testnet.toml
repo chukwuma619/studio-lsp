@@ -13,7 +13,7 @@ min_amount_shannons = 10_000_000_000
 # 0 funds nothing.
 max_funding_shannons = 1_000_000_000_000
 
-# CKB this node locks when a wallet opens a channel. Must be above the 99 CKB reserve.
+# CKB this node locks when a wallet opens a channel. Must be above the 100 CKB reserve.
 accept_funding_shannons = 100_000_000_000
 
 max_inflight_opens = 8

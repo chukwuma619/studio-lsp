@@ -12,7 +12,7 @@ Amounts below are the shipped policies. 1 CKB is 100,000,000 shannons.
 | Smallest payment that may open a channel | 100 CKB | 100 CKB |
 | Most CKB this node will lock in one channel | 10,000 CKB | 1,000 CKB |
 | CKB this node adds when a wallet opens a channel to send | 1,000 CKB | 1,000 CKB |
-| Inbound left after a just-in-time payment | 901 CKB, until the payment plus the cell reserve already fills the 10,000 CKB cap | Whatever still fits under the 1,000 CKB cap after the payment and the 99 CKB reserve |
+| Inbound left after a just-in-time payment | 900 CKB, until the payment plus the 100 CKB reserve already fills the 10,000 CKB cap | Whatever still fits under the 1,000 CKB cap after the payment and the 100 CKB reserve |
 
 Edit `policy/testnet.toml` or `policy/mainnet.toml` before you fund the node. Mainnet spends real CKB.
 
@@ -109,7 +109,7 @@ Wallets still learn the public graph from Fiber bootnodes. Payment channels go t
 On testnet, with a Fiber Studio build that includes the published entry:
 
 1. Start the wallet. The log should say payments can open a receive channel with Studio LSP. The network page should show Studio LSP connected without anyone pasting an address.
-2. Create a CKB invoice before any channel exists. Pay it from another wallet that already has a route to this node. The sender pays the 10 CKB open fee. This node locks the payment, the 99 CKB cell reserve, and spare inbound up to the cushion.
+2. Create a CKB invoice before any channel exists. Pay it from another wallet that already has a route to this node. The sender pays the 10 CKB open fee. This node locks the payment, the 100 CKB channel reserve, and spare inbound up to the cushion.
 3. From a wallet with on-chain CKB and no channel, send a payment. Fiber Studio opens a private channel funded by that user. This node accepts and locks its own 1,000 CKB on the far side, which is what that user can later receive.
 
 ## Operating

@@ -1,9 +1,10 @@
 use serde::Deserialize;
 use thiserror::Error;
 
-/// On-chain cell reserve Studio already budgets when it opens a channel.
 pub const SHANNONS_PER_CKB: u64 = 100_000_000;
-pub const CELL_RESERVE_SHANNONS: u64 = 99 * SHANNONS_PER_CKB;
+
+/// Commitment cell plus shutdown fee. Fiber rejects channel funding below this.
+pub const CELL_RESERVE_SHANNONS: u64 = 100 * SHANNONS_PER_CKB;
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct Policy {
@@ -81,8 +82,8 @@ impl Policy {
         Ok(())
     }
 
-    /// Largest payment a Fiber Studio wallet should accept on a Studio LSP channel.
-    /// Studio LSP adds the cell reserve on top of the payment before funding.
+    /// Largest payment this node can fund for a receiver.
+    /// The cell reserve is added on top of the payment before funding.
     pub fn receiver_max_amount_shannons(&self) -> u64 {
         self.max_funding_shannons
             .saturating_sub(CELL_RESERVE_SHANNONS)

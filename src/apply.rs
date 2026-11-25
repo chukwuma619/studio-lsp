@@ -181,7 +181,7 @@ rpc:
         assert!(rendered.contains("jit_service_enabled: true"));
         assert!(rendered.contains("jit_open_fee: 1000000000"));
         assert!(rendered.contains("jit_max_funding: 1000000000000"));
-        assert!(rendered.contains("jit_inbound_cushion: 90100000000"));
+        assert!(rendered.contains("jit_inbound_cushion: 90000000000"));
         assert!(rendered.contains("auto_accept_channel_ckb_funding_amount: 100000000000"));
         assert!(rendered.contains("open_channel_auto_accept_min_ckb_funding_amount: 10000000000"));
         assert!(rendered.contains("# jit_service_enabled: false"));

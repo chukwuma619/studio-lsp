@@ -59,7 +59,7 @@ cargo run -- publish \
   --liquidity-json ../fiber-studio/app/shared/liquidity.json
 ```
 
-The payment cap is the funding maximum minus the 99 CKB cell reserve. The open-fee cap equals the Studio LSP fee, which is the highest fee Fiber Studio will accept from this node.
+The payment cap is the funding maximum minus the 100 CKB channel reserve. The open-fee cap equals the Studio LSP fee, which is the highest fee Fiber Studio will accept from this node.
 
 Rebuild and ship Fiber Studio after that change. The next time a Fiber Studio node starts, it connects to Studio LSP only, registers for incoming payments, and opens a private channel with the user's CKB when they send.
 
@@ -70,3 +70,5 @@ cargo test
 cargo fmt --all
 cargo clippy --all-targets -- -D warnings
 ```
+
+`cargo test` starts real Fiber nodes. It needs the `fiber` checkout next to this directory, and the first build takes several minutes.
