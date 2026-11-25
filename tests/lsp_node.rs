@@ -24,8 +24,8 @@ use tokio::sync::Mutex;
 use studio_lsp::apply;
 use studio_lsp::policy::{Policy, CELL_RESERVE_SHANNONS, SHANNONS_PER_CKB};
 
-const TESTNET_TEMPLATE: &str = include_str!("../../fiber/config/testnet/config.yml");
-const MAINNET_TEMPLATE: &str = include_str!("../../fiber/config/mainnet/config.yml");
+const TESTNET_TEMPLATE: &str = include_str!("fixtures/testnet.yml");
+const MAINNET_TEMPLATE: &str = include_str!("fixtures/mainnet.yml");
 
 /// The Fiber test harness shares one root actor, so the node tests take turns.
 static NODE_TESTS: Mutex<()> = Mutex::const_new(());

@@ -2,7 +2,7 @@
 
 Studio LSP is one public Fiber node. Fiber Studio wallets stay on users' machines. You lock CKB so those wallets can receive. Each user locks their own CKB when they want to send.
 
-Build `fnn` from the Fiber tree in this workspace. Studio LSP writes `jit_inbound_cushion`, and that key has to be one this `fnn` understands.
+Install `fnn` from [Fiber](https://github.com/nervosnetwork/fiber) before you run Studio LSP. Studio LSP only edits that node's `config.yml`. It does not start `fnn`. The `fnn` you install has to understand `jit_inbound_cushion`.
 
 Amounts below are the shipped policies. 1 CKB is 100,000,000 shannons.
 
@@ -24,9 +24,7 @@ Point `ckb.rpc_url` in the fnn config at a CKB node for the same network. The st
 
 ## 2. Create the node
 
-Install `fnn` built from this workspace's `fiber` checkout. From an empty data directory, start once with the official config for that network so `fnn` writes `config.yml` and the key, or copy `fiber/config/testnet/config.yml` (or `mainnet`) into the data directory as `config.yml`.
-
-Stop `fnn`, then from this directory:
+Install `fnn`, then create the node. From an empty data directory, start once with the official Fiber config for that network so `fnn` writes `config.yml` and the key. Copying `config/testnet/config.yml` or `config/mainnet/config.yml` from the Fiber repository into the data directory works too. Stop `fnn`, then from this directory:
 
 ```bash
 cargo run -- apply --policy policy/testnet.toml --fnn-config /var/lib/studio-lsp/config.yml

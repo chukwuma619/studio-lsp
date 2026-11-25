@@ -20,8 +20,8 @@ toml = "0.8"
 
 [dev-dependencies]
 clap-serde-derive = "0.2.1"
-fiber-json-types = { path = "../fiber/crates/fiber-json-types" }
-fnn = { path = "../fiber/crates/fiber-lib", features = ["bench", "sqlite"] }
+fiber-json-types = { git = "https://github.com/chukwuma619/fiber.git", branch = "feat/jit-channel" }
+fnn = { git = "https://github.com/chukwuma619/fiber.git", branch = "feat/jit-channel", features = ["bench", "sqlite"] }
 ractor = "0.15"
 serde_yaml = "0.9"
 tentacle-secio = "0.6.9"

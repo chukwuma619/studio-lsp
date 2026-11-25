@@ -1,6 +1,6 @@
 # Studio LSP
 
-Studio LSP is the Fiber liquidity service for [Fiber Studio](https://www.getfiberstudio.com/). A Fiber Studio wallet registers with Studio LSP. When someone pays that wallet and it has no inbound channel, Studio LSP opens a private CKB channel and forwards the payment. Fiber Studio stays the wallet. Official `fnn` stays the node. Studio LSP is the service you run.
+Studio LSP is the Fiber liquidity service for [Fiber Studio](https://www.getfiberstudio.com/). A Fiber Studio wallet registers with Studio LSP. When someone pays that wallet and it has no inbound channel, Studio LSP opens a private CKB channel and forwards the payment. Fiber Studio stays the wallet. The node is [fnn](https://github.com/nervosnetwork/fiber). This repository only writes that node's liquidity settings. It does not start a node.
 
 A send spends CKB the wallet already holds. Studio LSP accepts that channel and locks `accept_funding_shannons` on its own side, which is what the wallet can later receive on the same channel. A receive with no channel uses a just-in-time open: Studio LSP funds it, up to `max_funding_shannons`, and the sender pays `open_fee_shannons`.
 
@@ -21,7 +21,7 @@ cargo run -- check --policy policy/testnet.toml
 
 ## Run a node
 
-Start from the official `fnn` config for that network. Studio LSP only fills the service settings. It removes wallet settings (`jit_lsp_pubkey`, `jit_max_amount`, `jit_max_open_fee`) if they are present, so this node does not also behave like a Fiber Studio wallet.
+Install `fnn` and create its data directory before you run `apply`. Start `fnn` once with the official config for that network so it writes `config.yml` and the node key, then stop it. `apply` only fills the service settings in that file. It removes wallet settings (`jit_lsp_pubkey`, `jit_max_amount`, `jit_max_open_fee`) if they are present, so this node does not also behave like a Fiber Studio wallet.
 
 ```bash
 cargo run -- apply --policy policy/testnet.toml --fnn-config /path/to/config.yml
@@ -71,4 +71,4 @@ cargo fmt --all
 cargo clippy --all-targets -- -D warnings
 ```
 
-`cargo test` starts real Fiber nodes. It needs the `fiber` checkout next to this directory, and the first build takes several minutes.
+`cargo test` starts real Fiber nodes. The first build takes several minutes.

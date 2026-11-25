@@ -1893,6 +1893,7 @@ checksum = "28dea519a9695b9977216879a3ebfddf92f1c08c05d984f8996aecd6ecdc811d"
 [[package]]
 name = "fiber-json-types"
 version = "0.10.1"
+source = "git+https://github.com/chukwuma619/fiber.git?branch=feat%2Fjit-channel#293659ee3090b274107ee96aeaccad74cd3c3589"
 dependencies = [
  "ckb-jsonrpc-types",
  "ckb-types",
@@ -1922,6 +1923,7 @@ dependencies = [
 [[package]]
 name = "fiber-store"
 version = "0.10.1"
+source = "git+https://github.com/chukwuma619/fiber.git?branch=feat%2Fjit-channel#293659ee3090b274107ee96aeaccad74cd3c3589"
 dependencies = [
  "anyhow",
  "bincode 1.3.3",
@@ -1977,6 +1979,7 @@ dependencies = [
 [[package]]
 name = "fiber-types"
 version = "0.10.1"
+source = "git+https://github.com/chukwuma619/fiber.git?branch=feat%2Fjit-channel#293659ee3090b274107ee96aeaccad74cd3c3589"
 dependencies = [
  "anyhow",
  "arcode",
@@ -2013,6 +2016,7 @@ dependencies = [
 [[package]]
 name = "fiber-wasm-db-common"
 version = "0.1.0"
+source = "git+https://github.com/chukwuma619/fiber.git?branch=feat%2Fjit-channel#293659ee3090b274107ee96aeaccad74cd3c3589"
 dependencies = [
  "anyhow",
  "bincode 2.0.1",
@@ -2046,6 +2050,7 @@ dependencies = [
 [[package]]
 name = "fnn"
 version = "0.10.1"
+source = "git+https://github.com/chukwuma619/fiber.git?branch=feat%2Fjit-channel#293659ee3090b274107ee96aeaccad74cd3c3589"
 dependencies = [
  "aes-gcm",
  "anyhow",
