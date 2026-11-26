@@ -102,6 +102,8 @@ Rebuild Fiber Studio and ship that build. `liquidity.json` is compiled into the 
 
 Wallets still learn the public graph from Fiber bootnodes. Payment channels go through Studio LSP.
 
+The same pubkey and multiaddr are how a Fiber node outside Fiber Studio connects. `fnn`, fiber-wasm, and fiber-js set `jit_lsp_pubkey`, `jit_max_amount`, and `jit_max_open_fee`, then dial this node. Fiber Studio writes those for its own wallets. The current testnet values and the dial commands are in [README.md](README.md). When you move the node, update that section along with `liquidity.json`.
+
 ## 6. Check a wallet
 
 On testnet, with a Fiber Studio build that includes the published entry:
